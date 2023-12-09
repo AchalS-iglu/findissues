@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "@/styles/LeftSidebar.module.css";
 import { langs } from "@/helper/Languages";
 import { tags } from "@/helper/tags";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { addRemoveTagsToQuery } from "@/utils/searchParamsHelpers";
 
 export default function LeftSidebar() {
   const router = useRouter();
@@ -11,6 +12,29 @@ export default function LeftSidebar() {
   function isCurrentPath(path) {
     return router.pathname === path;
   }
+
+  const addTag = (param, type) => {
+    if (isCurrentPath("/search")) {
+      router.replace({
+        query: {
+          ...router.query,
+          [type]: addRemoveTagsToQuery(router.query[type] ?? "", param),
+        },
+      });
+    } else {
+      router.push({
+        pathname: "/search",
+        query: param,
+      });
+    }
+  };
+
+  const isActive = (tag, type) => {
+    if (router.query[type] === undefined) {
+      return false;
+    }
+    return router.query[type].includes(tag);
+  };
 
   return (
     <>
@@ -27,21 +51,20 @@ export default function LeftSidebar() {
             >
               {langs.map((lang) => {
                 return (
-                  <Link
-                    href={`/search/${lang.query}`}
+                  <button
+                    // href={`/search/${lang.query}`}
                     key={lang.query}
                     className={`first:mt-3 cursor-pointer grow`}
+                    onClick={() => addTag(lang.query, "lang")}
                   >
                     <div
                       className={`${
-                        lang.query === router.query.lang
-                          ? "bg-main_secondary"
-                          : ""
+                        isActive(lang.query, "lang") ? "bg-main_secondary" : ""
                       } cursor-pointer mr-2 lang_name px-3 py-1 text-center border-main_primary border-[2px] rounded-[5px] italic font-semibold text-main_primary text-[12px] lg:text-[14px] transition-all transform md:hover:scale-105 md:hover:border-dashed md:hover:text-main_yellow md:hover:border-main_yellow duration-300`}
                     >
                       {lang.lang_name}
                     </div>
-                  </Link>
+                  </button>
                 );
               })}
             </div>
@@ -55,21 +78,20 @@ export default function LeftSidebar() {
             >
               {tags.map((tag) => {
                 return (
-                  <Link
-                    href={`/search/${tag.query}`}
+                  <button
+                    // href={`/search/${tag.query}`}
                     key={tag.query}
                     className={`first:mt-3 cursor-pointer grow`}
+                    onClick={() => addTag(tag.query, "tag")}
                   >
                     <div
                       className={` ${
-                        tag.query === router?.query?.lang
-                          ? "bg-main_secondary"
-                          : ""
+                        isActive(tag.query, "tag") ? "bg-main_secondary" : ""
                       } cursor-pointer mr-2 lang_name truncate px-3 py-1 text-center border-main_primary border-[2px] rounded-[5px] italic font-semibold text-main_primary text-[12px] lg:text-[14px] transition-all transform md:hover:scale-105 md:hover:border-dashed md:hover:text-main_yellow md:hover:border-main_yellow duration-300`}
                     >
                       {tag.tag_name}
                     </div>
-                  </Link>
+                  </button>
                 );
               })}
             </div>
@@ -95,9 +117,7 @@ export default function LeftSidebar() {
               <Link
                 href={"/active-repos"}
                 className={`${
-                  isCurrentPath("/active-repos")
-                    ? "bg-main_secondary"
-                    : ""
+                  isCurrentPath("/active-repos") ? "bg-main_secondary" : ""
                 } 
                   cursor-pointer flex items-center justify-center rounded-[5px] w-[110px] h-10 mr-2 px-3 py-1 text-center border-main_primary border-[2px] italic font-semibold text-main_primary text-[12px] lg:text-[14px] transition-all transform md:hover:scale-105 md:hover:border-dashed md:hover:text-main_yellow md:hover:border-main_yellow duration-300 grow`}
               >
